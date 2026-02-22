@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="text_color">#FFFFFF</color>
+    <color name="button_color">#F7F7F7</color>
+    <color name="preset_color">#1C274C</color>
+    <color name="knob_color">#45484B</color>
+    <color name="indicator_color">#E61E1E</color>
+    <color name="dot_inactive_color">#8D9195</color>
+    <color name="dot_active_color">#FFFFFF</color>
+    <color name="wave_color">#56DC6E</color>
+    <color name="unplay_color">#5A685D</color>
+    <color name="unprogress_color">#A2C8EF</color>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.textview.MaterialTextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvPreset"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="14dp"
+    android:textColor="@color/text_color"
+    android:textSize="14sp"
+    android:fontFamily="@font/poppins_medium"
+    android:includeFontPadding="false"
+    android:gravity="center_vertical"
+    android:background="@android:color/transparent"
+    android:ellipsize="end"
+    android:maxLines="1"/>

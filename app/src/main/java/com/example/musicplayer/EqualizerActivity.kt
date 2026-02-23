@@ -99,12 +99,21 @@ class EqualizerActivity : AppCompatActivity() {
     // Knob
     private fun setupBassKnob() {
 
-        knobBass.onValueChange = { percent ->
-            val strength = (percent * 1000).toInt().coerceIn(0, 1000)
-            bassBoost?.setStrength(strength.toShort())
+        bassBoost?.apply {
+            enabled = true
         }
 
-        // Sync current bass strength
+        knobBass.onValueChange = { percent ->
+
+            val strength = (percent * 1000).toInt().coerceIn(0, 1000).toShort()
+
+            bassBoost?.apply {
+                setStrength(strength)
+                enabled = true
+            }
+        }
+
+        // Sync UI with current strength
         bassBoost?.let {
             val current = it.roundedStrength
             val percent = current / 1000f

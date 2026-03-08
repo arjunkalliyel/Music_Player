@@ -3,14 +3,15 @@ package com.example.musicplayer.waveform
 import android.content.Context
 import android.media.MediaExtractor
 import android.media.MediaFormat
+import java.nio.ByteBuffer
 import kotlin.math.abs
 
 object WaveformExtractor {
 
-    fun extract(context: Context, resId: Int, samples: Int = 200): List<Int> {
+    fun extract(context: Context, assetPath: String, samples: Int = 200): List<Int> {
 
         val extractor = MediaExtractor()
-        val afd = context.resources.openRawResourceFd(resId)
+        val afd = context.assets.openFd(assetPath)
 
         extractor.setDataSource(
             afd.fileDescriptor,
@@ -25,6 +26,7 @@ object WaveformExtractor {
         for (i in 0 until extractor.trackCount) {
             val format = extractor.getTrackFormat(i)
             val mime = format.getString(MediaFormat.KEY_MIME) ?: continue
+
             if (mime.startsWith("audio/")) {
                 trackIndex = i
                 break
@@ -39,10 +41,11 @@ object WaveformExtractor {
         val amplitudes = mutableListOf<Int>()
 
         while (true) {
-            val size = extractor.readSampleData(java.nio.ByteBuffer.wrap(buffer), 0)
+            val size = extractor.readSampleData(ByteBuffer.wrap(buffer), 0)
             if (size < 0) break
 
             for (i in 0 until size step 2) {
+                if (i + 1 >= size) break
                 val value = (buffer[i].toInt() shl 8) or
                         (buffer[i + 1].toInt() and 0xFF)
                 amplitudes.add(abs(value))

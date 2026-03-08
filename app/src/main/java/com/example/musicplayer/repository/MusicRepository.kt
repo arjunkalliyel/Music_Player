@@ -11,22 +11,27 @@ class MusicRepository(private val context: Context) {
 
     fun getTracks(): List<AudioTrack> {
 
-        val rawSongs = listOf(
-            R.raw.bad_boy_song1,
-            R.raw.one_republic_song2,
-            R.raw.post_malone_song3
+        val assetSongs = listOf(
+            "bad_boy_song1.mp3",
+            "one_republic_song2.mp3",
+            "post_malone_song3.mp3"
         )
 
-        return rawSongs.map { resId ->
+        return assetSongs.map { fileName ->
 
             val retriever = MediaMetadataRetriever()
-            val uri = Uri.parse("android.resource://${context.packageName}/$resId")
 
-            retriever.setDataSource(context, uri)
+            val afd = context.assets.openFd(fileName)
+
+            retriever.setDataSource(
+                afd.fileDescriptor,
+                afd.startOffset,
+                afd.length
+            )
 
             val title = retriever.extractMetadata(
                 MediaMetadataRetriever.METADATA_KEY_TITLE
-            ) ?: context.resources.getResourceEntryName(resId)
+            ) ?: fileName.removeSuffix(".mp3")
 
             val artist = retriever.extractMetadata(
                 MediaMetadataRetriever.METADATA_KEY_ARTIST
@@ -37,6 +42,7 @@ class MusicRepository(private val context: Context) {
             )?.toInt() ?: 0
 
             val artBytes = retriever.embeddedPicture
+
             val bitmap = artBytes?.let {
                 BitmapFactory.decodeByteArray(it, 0, it.size)
             }
@@ -47,7 +53,7 @@ class MusicRepository(private val context: Context) {
                 title = title,
                 artist = artist,
                 duration = duration,
-                resId = resId,
+                assetPath = fileName,
                 albumArt = bitmap
             )
         }

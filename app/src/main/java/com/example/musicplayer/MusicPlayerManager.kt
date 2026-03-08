@@ -23,9 +23,17 @@ class MusicPlayerManager(
         currentIndex = index
 
         val track = tracks[currentIndex]
-        val uri = Uri.parse("android.resource://${context.packageName}/${track.resId}")
+        val afd = context.assets.openFd(track.assetPath)
 
-        mediaPlayer = MediaPlayer.create(context, uri)
+        mediaPlayer = MediaPlayer()
+        mediaPlayer?.setDataSource(
+            afd.fileDescriptor,
+            afd.startOffset,
+            afd.length
+        )
+
+        mediaPlayer?.prepare()
+        mediaPlayer?.start()
 
         mediaPlayer?.setOnCompletionListener {
             playNext()

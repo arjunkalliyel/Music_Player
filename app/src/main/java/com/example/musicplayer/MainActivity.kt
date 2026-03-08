@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
             //  Extract waveform in background
             lifecycleScope.launch {
                 val waveformData = withContext(Dispatchers.IO) {
-                    WaveformExtractor.extract(this@MainActivity, track.resId)
+                    WaveformExtractor.extract(this@MainActivity, track.assetPath)
                 }
                 waveformView.setWaveform(waveformData)
             }

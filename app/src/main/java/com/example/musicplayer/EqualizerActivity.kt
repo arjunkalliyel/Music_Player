@@ -44,7 +44,6 @@ class EqualizerActivity : AppCompatActivity() {
         setupBassKnob()
         setupTrebleKnob()
         setupPresets()
-
     }
 
     private fun initViews() {

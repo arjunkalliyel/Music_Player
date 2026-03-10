@@ -12,10 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MusicPlayer">
         <activity
-            android:name=".EqualizerActivity"
+            android:name=".screens.EqualizerActivity"
             android:exported="false" />
         <activity
-            android:name=".SplashActivity"
+            android:name=".screens.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.MusicPlayer">
             <intent-filter>
@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".screens.MainActivity"
             android:exported="false" />
     </application>
 

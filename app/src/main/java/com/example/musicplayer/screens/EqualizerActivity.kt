@@ -1,4 +1,4 @@
-package com.example.musicplayer
+package com.example.musicplayer.screens
 
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
@@ -12,6 +12,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.musicplayer.R
 import com.example.musicplayer.roundKnobView.RoundKnobView
 
 class EqualizerActivity : AppCompatActivity() {

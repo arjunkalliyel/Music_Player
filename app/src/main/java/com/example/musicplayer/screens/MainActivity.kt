@@ -143,8 +143,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        val startIndex = intent.getIntExtra("TRACK_INDEX", 0)
+
         if (tracks.isNotEmpty()) {
-            musicPlayerManager.play(0)
+            musicPlayerManager.play(startIndex)
         }
     }
 

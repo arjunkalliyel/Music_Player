@@ -40,6 +40,9 @@ android {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
         }
     }
+    viewBinding {
+        enable = true
+    }
 }
 
 dependencies {
@@ -64,5 +67,8 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.core.splashscreen)
+
+    // glide
+    implementation(libs.glide)
 
 }

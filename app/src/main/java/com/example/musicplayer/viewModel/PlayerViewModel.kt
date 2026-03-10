@@ -23,22 +23,28 @@ class PlayerViewModel(
     private val _progress = MutableStateFlow(0)
     val progress = _progress.asStateFlow()
 
+    private val _isPlaying = MutableStateFlow(false)
+    val isPlaying = _isPlaying.asStateFlow()
+
     private val handler = Handler(Looper.getMainLooper())
 
     init {
+
         _tracks.value = repository.getTracks()
 
-        // Listen for track changes from manager
         playerManager.onTrackChanged = { track ->
             _currentTrack.value = track
         }
 
-        // Start first track automatically
-        if (_tracks.value.isNotEmpty()) {
-            playerManager.play(0)
+        playerManager.onPlaybackStateChanged = { playing ->
+            _isPlaying.value = playing
         }
 
         startProgressUpdates()
+    }
+
+    fun play(index: Int) {
+        playerManager.play(index)
     }
 
     fun playPause() {
@@ -49,17 +55,11 @@ class PlayerViewModel(
         }
     }
 
-    fun next() {
-        playerManager.playNext()
-    }
+    fun next() = playerManager.playNext()
 
-    fun previous() {
-        playerManager.playPrevious()
-    }
+    fun previous() = playerManager.playPrevious()
 
-    fun seekTo(pos: Int) {
-        playerManager.seekTo(pos)
-    }
+    fun seekTo(pos: Int) = playerManager.seekTo(pos)
 
     private fun startProgressUpdates() {
         handler.post(object : Runnable {

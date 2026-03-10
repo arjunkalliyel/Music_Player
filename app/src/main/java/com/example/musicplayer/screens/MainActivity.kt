@@ -42,10 +42,14 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        // Repository
         val repository = MusicRepository(this)
         tracks = repository.getTracks()
 
+        // Player Manager
         musicPlayerManager = MusicPlayerManager(this, tracks)
+
+        // ViewModel
         viewModel = PlayerViewModel(repository, musicPlayerManager)
 
         // UI references
@@ -58,10 +62,39 @@ class MainActivity : AppCompatActivity() {
         val nextBtn = findViewById<ImageView>(R.id.btnNext)
         val prevBtn = findViewById<ImageView>(R.id.btnPrevious)
         val waveformView = findViewById<WaveformView>(R.id.waveformView)
+        val equalizerBtn = findViewById<Button>(R.id.btnEqualizer)
 
-        musicPlayerManager.onPlaybackStateChanged = { isPlaying ->
-            runOnUiThread {
-                if (isPlaying) {
+        // Observe Track Changes
+        lifecycleScope.launchWhenStarted {
+            viewModel.currentTrack.collect { track ->
+
+                track ?: return@collect
+
+                title.text = track.title
+                artist.text = track.artist
+                seekBar.max = track.duration
+
+                if (track.albumArt != null) {
+                    albumArt.setImageBitmap(track.albumArt)
+                } else {
+                    albumArt.setImageResource(R.drawable.ic_placeholder)
+                }
+
+                // Extract waveform
+                lifecycleScope.launch {
+                    val waveformData = withContext(Dispatchers.IO) {
+                        WaveformExtractor.extract(this@MainActivity, track.assetPath)
+                    }
+                    waveformView.setWaveform(waveformData)
+                }
+            }
+        }
+
+        // Observe Play / Pause state
+        lifecycleScope.launchWhenStarted {
+            viewModel.isPlaying.collect { playing ->
+
+                if (playing) {
                     playBtn.setImageResource(R.drawable.ic_pause)
                 } else {
                     playBtn.setImageResource(R.drawable.ic_play)
@@ -69,29 +102,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        //  Update UI when track changes
-        musicPlayerManager.onTrackChanged = { track ->
-
-            title.text = track.title
-            artist.text = track.artist
-            seekBar.max = track.duration
-
-            if (track.albumArt != null) {
-                albumArt.setImageBitmap(track.albumArt)
-            } else {
-                albumArt.setImageResource(R.drawable.ic_placeholder)
-            }
-
-            //  Extract waveform in background
-            lifecycleScope.launch {
-                val waveformData = withContext(Dispatchers.IO) {
-                    WaveformExtractor.extract(this@MainActivity, track.assetPath)
-                }
-                waveformView.setWaveform(waveformData)
-            }
-        }
-
-        //  Time progress
+        // Observe Progress
         lifecycleScope.launchWhenStarted {
             viewModel.progress.collect { currentPosition ->
 
@@ -111,43 +122,42 @@ class MainActivity : AppCompatActivity() {
 
         // Play / Pause
         playBtn.setOnClickListener {
-            if (musicPlayerManager.isPlaying()) {
-                musicPlayerManager.pause()
-            } else {
-                musicPlayerManager.resume()
-            }
+            viewModel.playPause()
         }
 
+        // Next
         nextBtn.setOnClickListener {
-            musicPlayerManager.playNext()
+            viewModel.next()
         }
 
+        // Previous
         prevBtn.setOnClickListener {
-            musicPlayerManager.playPrevious()
+            viewModel.previous()
         }
 
+        // Seekbar
         seekBar.setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
 
             override fun onProgressChanged(sb: SeekBar?, pos: Int, fromUser: Boolean) {
-                if (fromUser) musicPlayerManager.seekTo(pos)
+                if (fromUser) viewModel.seekTo(pos)
             }
 
             override fun onStartTrackingTouch(sb: SeekBar?) {}
+
             override fun onStopTrackingTouch(sb: SeekBar?) {}
         })
 
-        findViewById<Button>(R.id.btnEqualizer).setOnClickListener {
+        // Equalizer
+        equalizerBtn.setOnClickListener {
             val intent = Intent(this, EqualizerActivity::class.java)
             intent.putExtra("AUDIO_SESSION_ID", musicPlayerManager.getAudioSessionId())
             startActivity(intent)
         }
 
+        // Start Selected Song
         val startIndex = intent.getIntExtra("TRACK_INDEX", 0)
-
-        if (tracks.isNotEmpty()) {
-            musicPlayerManager.play(startIndex)
-        }
+        viewModel.play(startIndex)
     }
 
     override fun onDestroy() {

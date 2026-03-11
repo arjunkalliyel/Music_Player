@@ -17,9 +17,11 @@ composeBom = "2026.01.00"
 credentials = "1.5.0"
 coreSplashscreen = "1.2.0"
 glide = "5.0.5"
+media = "1.7.1"
 
 [libraries]
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-media = { module = "androidx.media:media", version.ref = "media" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }

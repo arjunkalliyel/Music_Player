@@ -67,6 +67,8 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.core.splashscreen)
+    // media
+    implementation(libs.androidx.media)
 
     // glide
     implementation(libs.glide)

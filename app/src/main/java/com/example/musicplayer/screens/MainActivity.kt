@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         tracks = repository.getTracks()
 
         // Player Manager
-        musicPlayerManager = MusicPlayerManager(this, tracks)
+        musicPlayerManager = MusicPlayerManager.getInstance(this, tracks)
 
         // ViewModel
         viewModel = PlayerViewModel(repository, musicPlayerManager)

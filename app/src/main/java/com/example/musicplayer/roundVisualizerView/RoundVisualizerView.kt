@@ -32,7 +32,7 @@ class RoundVisualizerView @JvmOverloads constructor(
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = 8f
+        strokeWidth = 6f
         strokeCap = Paint.Cap.ROUND
     }
     // receives FFT audio data

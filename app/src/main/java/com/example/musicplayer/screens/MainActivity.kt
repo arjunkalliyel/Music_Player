@@ -1,7 +1,9 @@
 package com.example.musicplayer.screens
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
@@ -9,6 +11,8 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +20,7 @@ import com.example.musicplayer.MusicPlayerManager
 import com.example.musicplayer.R
 import com.example.musicplayer.model.AudioTrack
 import com.example.musicplayer.repository.MusicRepository
+import com.example.musicplayer.roundVisualizerView.RoundVisualizerView
 import com.example.musicplayer.utils.TimeUtils
 import com.example.musicplayer.viewModel.PlayerViewModel
 import com.example.musicplayer.waveform.WaveformExtractor
@@ -41,7 +46,15 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.RECORD_AUDIO),
+                1001
+            )
+        }
         // Repository
         val repository = MusicRepository(this)
         tracks = repository.getTracks()
@@ -63,6 +76,13 @@ class MainActivity : AppCompatActivity() {
         val prevBtn = findViewById<ImageView>(R.id.btnPrevious)
         val waveformView = findViewById<WaveformView>(R.id.waveformView)
         val equalizerBtn = findViewById<Button>(R.id.btnEqualizer)
+        val visualizerView = findViewById<RoundVisualizerView>(R.id.circleVisualizer)
+
+        musicPlayerManager.onFFTData = { fft ->
+            runOnUiThread {
+                visualizerView.updateFFT(fft)
+            }
+        }
 
         // Observe Track Changes
         lifecycleScope.launchWhenStarted {
@@ -158,6 +178,20 @@ class MainActivity : AppCompatActivity() {
         // Start Selected Song
         val startIndex = intent.getIntExtra("TRACK_INDEX", 0)
         viewModel.play(startIndex)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1001 &&
+            grantResults.isNotEmpty() &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
+            musicPlayerManager.refreshVisualizer()
+        }
     }
 
     override fun onDestroy() {

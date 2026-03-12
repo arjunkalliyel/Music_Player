@@ -11,11 +11,25 @@
     android:background="@drawable/blue_bg"
     tools:context=".screens.MainActivity">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/albumArt"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:src="@drawable/ic_placeholder"/>
+    <FrameLayout
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_gravity="center">
+
+        <com.example.musicplayer.roundVisualizerView.RoundVisualizerView
+            android:id="@+id/circleVisualizer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/albumArt"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_placeholder"
+            android:scaleType="centerCrop"/>
+    </FrameLayout>
+
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/title"

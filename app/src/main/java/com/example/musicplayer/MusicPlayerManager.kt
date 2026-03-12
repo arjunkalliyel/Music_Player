@@ -4,9 +4,13 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
+import android.media.audiofx.Visualizer
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.example.musicplayer.model.AudioTrack
 import com.example.musicplayer.service.MusicService
+import kotlin.math.ln
+import kotlin.math.sqrt
 
 class MusicPlayerManager private constructor(
     private val context: Context,
@@ -19,18 +23,22 @@ class MusicPlayerManager private constructor(
 
         fun getInstance(context: Context, tracks: List<AudioTrack>): MusicPlayerManager {
             return instance ?: synchronized(this) {
-                instance ?: MusicPlayerManager(context.applicationContext, tracks).also { instance = it }
+                instance ?: MusicPlayerManager(context.applicationContext, tracks).also {
+                    instance = it
+                }
             }
         }
     }
 
     private var mediaPlayer: MediaPlayer? = null
     private var currentIndex = 0
+    private var visualizer: Visualizer? = null
 
     var onTrackChanged: ((AudioTrack) -> Unit)? = null
     var onSessionReady: ((Int) -> Unit)? = null
     var onPlaybackStateChanged: ((Boolean) -> Unit)? = null
     var onServiceUpdate: (() -> Unit)? = null // New callback for the Background Service
+    var onFFTData: ((List<Float>) -> Unit)? = null
 
     fun getCurrentTrack(): AudioTrack? = if (tracks.isNotEmpty()) tracks[currentIndex] else null
 
@@ -55,6 +63,7 @@ class MusicPlayerManager private constructor(
     fun play(index: Int = currentIndex) {
         prepare(index)
         mediaPlayer?.start()
+        startVisualizer(mediaPlayer?.audioSessionId ?: -1)
         onPlaybackStateChanged?.invoke(true)
         startForegroundService()
         onServiceUpdate?.invoke()
@@ -62,6 +71,7 @@ class MusicPlayerManager private constructor(
 
     fun resume() {
         mediaPlayer?.start()
+        startVisualizer(mediaPlayer?.audioSessionId ?: -1)
         onPlaybackStateChanged?.invoke(true)
         onServiceUpdate?.invoke()
     }
@@ -98,7 +108,146 @@ class MusicPlayerManager private constructor(
     }
 
     fun release() {
+        releaseVisualizer()
         mediaPlayer?.release()
         mediaPlayer = null
+    }
+
+    fun refreshVisualizer() {
+        startVisualizer(mediaPlayer?.audioSessionId ?: -1)
+    }
+
+    private fun startVisualizer(audioSessionId: Int) {
+        releaseVisualizer()
+        if (audioSessionId <= 0) {
+            Log.w("codmLog", "Visualizer skipped: invalid audioSessionId=$audioSessionId")
+            return
+        }
+        try {
+            visualizer = Visualizer(audioSessionId).apply {
+//                captureSize = Visualizer.getCaptureSizeRange().maxOrNull()
+                captureSize = Visualizer.getCaptureSizeRange()[1]
+                    ?: Visualizer.getCaptureSizeRange()[0]
+                setDataCaptureListener(
+                    object : Visualizer.OnDataCaptureListener {
+                        override fun onWaveFormDataCapture(
+                            visualizer: Visualizer,
+                            waveform: ByteArray,
+                            samplingRate: Int
+                        ) {
+                            // No-op (FFT only)
+                        }
+
+                        //                        override fun onFftDataCapture(
+//                            visualizer: Visualizer,
+//                            fft: ByteArray,
+//                            samplingRate: Int
+//                        ) {
+//                            val magnitudes = FloatArray(fft.size / 2)
+//                            Log.e("Magnitude data", "FFT magnitude: $magnitudes")
+//                            var j = 0
+//                            var i = 0
+//
+//                            while (i < fft.size - 1) {
+//
+//                                val re = fft[i].toFloat()
+//                                val im = fft[i + 1].toFloat()
+//
+//                                val magnitude = sqrt(re * re + im * im)
+//
+//                                // LOG scale makes audio reactive
+//                                magnitudes[j] = ln(1 + magnitude)
+//
+//
+//                                i += 2
+//                                j++
+//                            }
+//
+//                            /// Number of magnitude values required
+////                            val sample = magnitudes.take(32)
+////                            Log.d("codmLog", "FFT magnitudes: $sample")
+////                            val sample = magnitudes.take(48)
+////                            onFFTData?.invoke(sample)
+//                            val bars = 48
+//                            val step = magnitudes.size / bars
+//
+//                            val grouped = MutableList(bars) { 0f }
+//
+//                            for (b in 0 until bars) {
+//
+//                                var sum = 0f
+//
+//                                for (i in 0 until step) {
+//                                    sum += magnitudes[b * step + i]
+//                                }
+//
+//                                grouped[b] = sum / step
+//                            }
+//                            onFFTData?.invoke(grouped)
+//                        }
+                        override fun onFftDataCapture(
+                            visualizer: Visualizer,
+                            fft: ByteArray,
+                            samplingRate: Int
+                        ) {
+
+                            val n = fft.size / 2
+                            val magnitudes = FloatArray(n)
+
+                            var j = 0
+                            var i = 2
+
+                            while (i < fft.size) {
+
+                                val re = fft[i].toInt()
+                                val im = fft[i + 1].toInt()
+
+                                val magnitude = sqrt((re * re + im * im).toFloat())
+
+                                // Better audio scaling
+                                magnitudes[j] = (20 * kotlin.math.log10(magnitude + 1f))
+
+                                i += 2
+                                j++
+                            }
+
+                            val bars = 48
+                            val step = magnitudes.size / bars
+
+                            val grouped = MutableList(bars) { 0f }
+
+                            for (b in 0 until bars) {
+
+                                var sum = 0f
+
+                                for (k in 0 until step) {
+                                    sum += magnitudes[b * step + k]
+                                }
+
+                                grouped[b] = sum / step
+                            }
+
+                            onFFTData?.invoke(grouped)
+                        }
+                    },
+                    /// Minimum delay between capture cycles.
+                    Visualizer.getMaxCaptureRate() / 2,
+                    false,
+                    true
+                )
+                enabled = true
+            }
+        } catch (e: Exception) {
+            Log.e("codmLog", "Visualizer init failed: ${e.message}")
+            releaseVisualizer()
+        }
+    }
+
+    private fun releaseVisualizer() {
+        try {
+            visualizer?.release()
+        } catch (_: Exception) {
+        }
+        visualizer = null
     }
 }

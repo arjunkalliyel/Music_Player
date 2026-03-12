@@ -14,7 +14,11 @@ class MusicRepository(private val context: Context) {
         val assetSongs = listOf(
             "bad_boy_song1.mp3",
             "one_republic_song2.mp3",
-            "post_malone_song3.mp3"
+            "post_malone_song3.mp3",
+            "david_guetta_song4.mp3",
+            "g_funk_song5.mp3",
+            "esDeeKid_song6.mp3",
+            "instrumental_version.mp3"
         )
 
         return assetSongs.map { fileName ->

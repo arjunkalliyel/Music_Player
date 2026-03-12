@@ -9,7 +9,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import com.example.musicplayer.model.AudioTrack
 import com.example.musicplayer.service.MusicService
-import kotlin.math.ln
+import com.example.musicplayer.utils.CommonUtils
 import kotlin.math.sqrt
 
 class MusicPlayerManager private constructor(
@@ -137,60 +137,11 @@ class MusicPlayerManager private constructor(
                         ) {
                             // No-op (FFT only)
                         }
-
-                        //                        override fun onFftDataCapture(
-//                            visualizer: Visualizer,
-//                            fft: ByteArray,
-//                            samplingRate: Int
-//                        ) {
-//                            val magnitudes = FloatArray(fft.size / 2)
-//                            Log.e("Magnitude data", "FFT magnitude: $magnitudes")
-//                            var j = 0
-//                            var i = 0
-//
-//                            while (i < fft.size - 1) {
-//
-//                                val re = fft[i].toFloat()
-//                                val im = fft[i + 1].toFloat()
-//
-//                                val magnitude = sqrt(re * re + im * im)
-//
-//                                // LOG scale makes audio reactive
-//                                magnitudes[j] = ln(1 + magnitude)
-//
-//
-//                                i += 2
-//                                j++
-//                            }
-//
-//                            /// Number of magnitude values required
-////                            val sample = magnitudes.take(32)
-////                            Log.d("codmLog", "FFT magnitudes: $sample")
-////                            val sample = magnitudes.take(48)
-////                            onFFTData?.invoke(sample)
-//                            val bars = 48
-//                            val step = magnitudes.size / bars
-//
-//                            val grouped = MutableList(bars) { 0f }
-//
-//                            for (b in 0 until bars) {
-//
-//                                var sum = 0f
-//
-//                                for (i in 0 until step) {
-//                                    sum += magnitudes[b * step + i]
-//                                }
-//
-//                                grouped[b] = sum / step
-//                            }
-//                            onFFTData?.invoke(grouped)
-//                        }
                         override fun onFftDataCapture(
                             visualizer: Visualizer,
                             fft: ByteArray,
                             samplingRate: Int
                         ) {
-
                             val n = fft.size / 2
                             val magnitudes = FloatArray(n)
 
@@ -211,27 +162,16 @@ class MusicPlayerManager private constructor(
                                 j++
                             }
 
-                            val bars = 48
-                            val step = magnitudes.size / bars
-
-                            val grouped = MutableList(bars) { 0f }
-
-                            for (b in 0 until bars) {
-
-                                var sum = 0f
-
-                                for (k in 0 until step) {
-                                    sum += magnitudes[b * step + k]
-                                }
-
-                                grouped[b] = sum / step
-                            }
-
+                            val grouped = processFFT(
+                                magnitudes,
+                                CommonUtils.barCount
+                            )
+                            Log.d("codmLog", "FFT magnitudes: $grouped")
                             onFFTData?.invoke(grouped)
                         }
                     },
                     /// Minimum delay between capture cycles.
-                    Visualizer.getMaxCaptureRate() / 2,
+                    Visualizer.getMaxCaptureRate() / CommonUtils.updateFrequency,
                     false,
                     true
                 )
@@ -241,6 +181,31 @@ class MusicPlayerManager private constructor(
             Log.e("codmLog", "Visualizer init failed: ${e.message}")
             releaseVisualizer()
         }
+    }
+    private fun processFFT(
+        fftMagnitudes: FloatArray,
+        barCount: Int
+    ): List<Float> {
+
+        if (fftMagnitudes.isEmpty()) return emptyList()
+
+        val step = fftMagnitudes.size / barCount
+        val grouped = MutableList(barCount) { 0f }
+
+        for (b in 0 until barCount) {
+
+            var sum = 0f
+
+            for (i in 0 until step) {
+                val index = b * step + i
+                if (index < fftMagnitudes.size) {
+                    sum += fftMagnitudes[index]
+                }
+            }
+
+            grouped[b] = sum / step
+        }
+        return grouped
     }
 
     private fun releaseVisualizer() {

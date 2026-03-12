@@ -16,7 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.musicplayer.MusicPlayerManager
+import com.example.musicplayer.musicPlayerManager.MusicPlayerManager
 import com.example.musicplayer.R
 import com.example.musicplayer.model.AudioTrack
 import com.example.musicplayer.repository.MusicRepository

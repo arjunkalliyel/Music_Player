@@ -11,7 +11,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
-import com.example.musicplayer.MusicPlayerManager
+import com.example.musicplayer.musicPlayerManager.MusicPlayerManager
 import com.example.musicplayer.R
 import com.example.musicplayer.screens.MainActivity
 

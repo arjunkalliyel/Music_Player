@@ -3,7 +3,7 @@ package com.example.musicplayer.viewModel
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.ViewModel
-import com.example.musicplayer.MusicPlayerManager
+import com.example.musicplayer.musicPlayerManager.MusicPlayerManager
 import com.example.musicplayer.model.AudioTrack
 import com.example.musicplayer.repository.MusicRepository
 import kotlinx.coroutines.flow.MutableStateFlow

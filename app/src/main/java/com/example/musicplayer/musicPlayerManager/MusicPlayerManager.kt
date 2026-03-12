@@ -1,4 +1,4 @@
-package com.example.musicplayer
+package com.example.musicplayer.musicPlayerManager
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import com.example.musicplayer.model.AudioTrack
 import com.example.musicplayer.service.MusicService
 import com.example.musicplayer.utils.CommonUtils
+import kotlin.math.log10
 import kotlin.math.sqrt
 
 class MusicPlayerManager private constructor(
@@ -156,7 +157,7 @@ class MusicPlayerManager private constructor(
                                 val magnitude = sqrt((re * re + im * im).toFloat())
 
                                 // Better audio scaling
-                                magnitudes[j] = (20 * kotlin.math.log10(magnitude + 1f))
+                                magnitudes[j] = (20 * log10(magnitude + 1f))
 
                                 i += 2
                                 j++

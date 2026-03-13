@@ -9,6 +9,8 @@ A modern Android Music Player built using Kotlin, implementing MVVM architecture
 
 ✅ Real-time audio waveform visualization
 
+✅ Dynamic Circular Audio Visualizer (FFT based)
+
 ✅ 5-Band Equalizer with Presets
 
 ✅ Custom Rotary Knob UI Component
@@ -56,6 +58,14 @@ A modern Android Music Player built using Kotlin, implementing MVVM architecture
 
 - Shows played vs unplayed portion visually
 
+🎇 Real-time Audio Visualizer
+
+- Uses Android's Visualizer API to extract real-time FFT (Fast Fourier Transform) data
+
+- Dynamic circular visualizer (RoundVisualizerView) reacting to audio frequency and magnitude
+
+- Synchronized, lag-free audio-visual experience
+
 🎛 Equalizer System
 
 - 5-band Equalizer:
@@ -92,16 +102,12 @@ A modern Android Music Player built using Kotlin, implementing MVVM architecture
 
 The project follows MVVM (Model–View–ViewModel) architecture.
 
-UI (Activities) 
+UI (Activities & Custom Views) ↓
 
-        ↓
-ViewModel (State Management)
+ViewModel (State Management) ↓
 
-        ↓
-      
-MusicPlayerManager (Playback Engine)
+MusicPlayerManager (Playback Engine & Visualizer API) ↓
 
-        ↓
 MediaPlayer (Android Framework)
 
 Layers
@@ -126,6 +132,8 @@ MusicPlayerManager
 - Manages playback
 
 - Handles track switching
+
+- Handles the Visualizer instance for real-time FFT capture
 
 - Exposes callbacks for UI updates
 
@@ -167,11 +175,15 @@ PlayerViewModel
 
 > BassBoost
 
+> Visualizer (FFT)
+
 - Custom Views:
 
 > WaveformView
 
 > RoundKnobView
+
+> RoundVisualizerView
 
 📁 Project Structure
 
@@ -205,6 +217,11 @@ com.example.musicplayer
 │   └── RoundKnobView.kt
 │
 
+├── roundVisualizerView/
+
+│   └── RoundVisualizerView.kt
+│
+
 ├── MusicPlayerManager.kt
 
 ├── MainActivity.kt
@@ -217,19 +234,19 @@ com.example.musicplayer
 
 🎵 Playback Flow
 
-1. MusicRepository loads tracks from res/raw
+1. MusicRepository loads tracks from res/raw.
 
-2. MusicPlayerManager prepares MediaPlayer
+2. MusicPlayerManager prepares the MediaPlayer and initializes the Visualizer.
 
-3. PlayerViewModel observes playback state
+3. PlayerViewModel observes playback state.
 
-4. MainActivity updates UI accordingly
+4. MainActivity updates UI accordingly.
 
-5. WaveformExtractor processes audio data in background
+5. WaveformExtractor processes audio data in the background and WaveformView renders it.
 
-6. WaveformView renders waveform
+6. MusicPlayerManager captures real-time FFT data and triggers UI updates for the RoundVisualizerView.
 
-7. EqualizerActivity attaches to audio session
+7. EqualizerActivity attaches to the active audio session for effects processing.
 
 🏗 Overall Architecture
 
@@ -242,7 +259,7 @@ MainActivity
 MusicRepository → Loads Tracks
 
         ↓
-MusicPlayerManager → Controls MediaPlayer
+MusicPlayerManager → Controls MediaPlayer & Visualizer
 
         ↓
 PlayerViewModel → State & Progress
@@ -251,15 +268,15 @@ PlayerViewModel → State & Progress
 WaveformExtractor → Audio Visualization
 
         ↓
+RoundVisualizerView → Real-Time FFT Visualizer
+
+        ↓
+        
 EqualizerActivity → Audio Effects
 
 
 
 🔮 Future Improvements
-
-- Background playback service
-
-- Notification controls
 
 - Playlist support
 

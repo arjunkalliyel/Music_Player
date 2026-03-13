@@ -151,6 +151,8 @@ PlayerViewModel
 
 - MainActivity – Player screen
 
+- MusicListActivity – Song library / track selection screen
+
 - EqualizerActivity – Audio effects screen
 
 - SplashActivity – App launch screen
@@ -224,33 +226,40 @@ com.example.musicplayer
 
 ├── MusicPlayerManager.kt
 
+├── SplashActivity.kt
+
+├── MusicListActivity.kt
+
 ├── MainActivity.kt
 
 ├── EqualizerActivity.kt
-
-├── SplashActivity.kt
 
 ⚙ How It Works
 
 🎵 Playback Flow
 
-1. MusicRepository loads tracks from res/raw.
+1. SplashActivity launches the app and handles initial setup.
 
-2. MusicPlayerManager prepares the MediaPlayer and initializes the Visualizer.
+2. MusicListActivity requests MusicRepository to load tracks from res/raw and displays the song library.
 
-3. PlayerViewModel observes playback state.
+3. User selects a track from the library, passing the intent to MainActivity.
 
-4. MainActivity updates UI accordingly.
+4. MusicPlayerManager prepares the MediaPlayer and initializes the Visualizer.
 
-5. WaveformExtractor processes audio data in the background and WaveformView renders it.
+5. PlayerViewModel observes playback state and MainActivity updates UI accordingly.
 
-6. MusicPlayerManager captures real-time FFT data and triggers UI updates for the RoundVisualizerView.
+6. WaveformExtractor processes audio data in the background and WaveformView renders it.
 
-7. EqualizerActivity attaches to the active audio session for effects processing.
+7. MusicPlayerManager captures real-time FFT data and triggers UI updates for the RoundVisualizerView.
+
+8. EqualizerActivity can be launched to attach to the active audio session for effects processing.
 
 🏗 Overall Architecture
 
 SplashActivity
+
+        ↓
+MusicListActivity → Song Library Selection
 
         ↓
 MainActivity

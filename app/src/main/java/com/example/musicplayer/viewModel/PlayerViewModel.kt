@@ -8,6 +8,7 @@ import com.example.musicplayer.model.AudioTrack
 import com.example.musicplayer.repository.MusicRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.example.musicplayer.R
 
 class PlayerViewModel(
     private val repository: MusicRepository,
@@ -26,6 +27,9 @@ class PlayerViewModel(
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying = _isPlaying.asStateFlow()
 
+    private val _playIcon = MutableStateFlow(R.drawable.ic_play)
+    val playIcon = _playIcon.asStateFlow()
+
     private val handler = Handler(Looper.getMainLooper())
 
     init {
@@ -38,6 +42,10 @@ class PlayerViewModel(
 
         playerManager.onPlaybackStateChanged = { playing ->
             _isPlaying.value = playing
+
+            _playIcon.value =
+                if (playing) R.drawable.ic_pause
+                else R.drawable.ic_play
         }
 
         startProgressUpdates()

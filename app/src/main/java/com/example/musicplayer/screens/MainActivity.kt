@@ -112,13 +112,8 @@ class MainActivity : AppCompatActivity() {
 
         // Observe Play / Pause state
         lifecycleScope.launchWhenStarted {
-            viewModel.isPlaying.collect { playing ->
-
-                if (playing) {
-                    playBtn.setImageResource(R.drawable.ic_pause)
-                } else {
-                    playBtn.setImageResource(R.drawable.ic_play)
-                }
+            viewModel.playIcon.collect { icon ->
+                playBtn.setImageResource(icon)
             }
         }
 

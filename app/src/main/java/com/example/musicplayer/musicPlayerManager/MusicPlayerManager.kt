@@ -38,7 +38,7 @@ class MusicPlayerManager private constructor(
     var onTrackChanged: ((AudioTrack) -> Unit)? = null
     var onSessionReady: ((Int) -> Unit)? = null
     var onPlaybackStateChanged: ((Boolean) -> Unit)? = null
-    var onServiceUpdate: (() -> Unit)? = null // New callback for the Background Service
+    var onServiceUpdate: (() -> Unit)? = null
     var onFFTData: ((List<Float>) -> Unit)? = null
 
     fun getCurrentTrack(): AudioTrack? = if (tracks.isNotEmpty()) tracks[currentIndex] else null
@@ -126,9 +126,7 @@ class MusicPlayerManager private constructor(
         }
         try {
             visualizer = Visualizer(audioSessionId).apply {
-//                captureSize = Visualizer.getCaptureSizeRange().maxOrNull()
                 captureSize = Visualizer.getCaptureSizeRange()[1]
-                    ?: Visualizer.getCaptureSizeRange()[0]
                 setDataCaptureListener(
                     object : Visualizer.OnDataCaptureListener {
                         override fun onWaveFormDataCapture(

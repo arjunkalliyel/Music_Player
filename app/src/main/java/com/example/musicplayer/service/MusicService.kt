@@ -33,7 +33,6 @@ class MusicService : Service() {
         createNotificationChannel()
 
         mediaSession = MediaSessionCompat(this, "MusicService").apply {
-            // Map notification interactions back to our Singleton manager
             setCallback(object : MediaSessionCompat.Callback() {
                 override fun onPlay() { MusicPlayerManager.instance?.resume() }
                 override fun onPause() { MusicPlayerManager.instance?.pause() }
@@ -77,7 +76,7 @@ class MusicService : Service() {
         val track = manager.getCurrentTrack() ?: return
         val isPlaying = manager.isPlaying()
 
-        // 1. Update Playback State (Critical for the seekbar to work in notification)
+        // Update Playback State
         val stateBuilder = PlaybackStateCompat.Builder()
             .setActions(
                 PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or
@@ -91,7 +90,7 @@ class MusicService : Service() {
             )
         mediaSession.setPlaybackState(stateBuilder.build())
 
-        // 2. Update Metadata (Critical for Album Art background and Title)
+        // Update Metadata
         val metadataBuilder = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, track.title)
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, track.artist)
@@ -102,7 +101,7 @@ class MusicService : Service() {
         }
         mediaSession.setMetadata(metadataBuilder.build())
 
-        // 3. Build Pending Intents for Notification Buttons
+        // Build Pending Intents
         val playPauseIntent = Intent(this, MusicService::class.java).setAction(ACTION_PLAY_PAUSE)
         val playPause = PendingIntent.getService(this, 0, playPauseIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
